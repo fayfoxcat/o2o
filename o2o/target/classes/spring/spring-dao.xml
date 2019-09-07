@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+    http://www.springframework.org/schema/context 
+    http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+
+	<!-- 配置整合mybatis -->
+	<!-- 1.配置数据库相关参数properties的属性：${url} 加载配置文件 -->
+	<context:property-placeholder
+		location="classpath:jdbc.properties" />
+
+	<!-- 2.数据库连接池c3p0 -->
+	<bean id="dataSource"
+		class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<!-- 配置连接池属性 -->
+		<property name="driverClass" value="${jdbc.driver}" />
+		<property name="jdbcUrl" value="${jdbc.url}" />
+		<property name="user" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+
+		<!-- c3p0连接池的私有属性 -->
+		<!-- 设置连接池中保留最大的连接数 -->
+		<property name="maxPoolSize" value="30"></property>
+		<!-- 设置连接池中保留的最小连接数,默认为: 3 -->
+		<property name="minPoolSize" value="10"></property>
+
+		<!-- 关闭连接后不自动commit -->
+		<property name="autoCommitOnClose" value="false"></property>
+		<!-- 获取连接超时时间 -->
+		<property name="checkoutTimeout" value="10000"></property>
+		<!-- 获取连接失败重试次数 -->
+		<property name="acquireRetryAttempts" value="2"></property>
+	</bean>
+
+	<!-- 3.配置SqlSessionFactory对象 -->
+	<bean id="sqlSessionFactory"
+		class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 注入数据库连接池 -->
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- 配置MyBaties全局配置文件：mybatis-config.xml -->
+		<property name="configLocation"
+			value="classpath:mybatis-config.xml"></property>
+		<!--扫描entity包(typeAliasesPackage：它一般对应我们的实体类所在的包，这个时候会自动取对应包中不包括包名 的简单类名作为包括包名的别名。多个package之间可以用逗号或者分号等来进行分隔（value的值一定要是包的全）) -->
+		<property name="typeAliasesPackage"
+			value="org.fox.o2o.entity"></property>
+		<!-- 扫描sql配置文件：mapper需要xml文件 -->
+		<property name="mapperLocations"
+			value="classpath:mapper/*.xml"></property>
+	</bean>
+
+	<!-- 4.配置扫描Dao接口包，动态实现Dao接口，注入到Spring容器中 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!-- 注入 sqlSessionFactory -->
+		<property name="sqlSessionFactoryBeanName"
+			value="sqlSessionFactory"></property>
+		<!-- 给出需要扫描Dao接口包 -->
+		<property name="basePackage" value="org.fox.o2o.dao"></property>
+	</bean>
+
+</beans>

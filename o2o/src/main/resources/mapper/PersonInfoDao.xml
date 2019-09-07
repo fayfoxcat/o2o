@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.fox.o2o.dao.PersonInfoDao">
+	<select id="queryPersonInfoList" resultType="org.fox.o2o.entity.PersonInfo">
+		SELECT
+		user_id,
+		name,
+		sex,
+		email,
+		profile_img,
+		user_type,
+		create_time,
+		last_edit_time,
+		enable_status
+		FROM
+		tb_person_info
+		<where>
+			<if test="personInfoCondition.userType != null">
+				and user_type= #{personInfoCondition.userType}
+			</if>
+			<!-- 写like语句的时候 一般都会写成 like '% %' 在mybatis里面写就是应该是 like '%${name} %' 而不是 
+				'%#{name} %' ${name} 是不带单引号的，而#{name} 是带单引号的 -->
+			<if test="personInfoCondition.name != null">
+				and name like '%${personInfoCondition.name}%'
+			</if>
+			<if test="personInfoCondition.enableStatus != null">
+				and enable_status = #{personInfoCondition.enableStatus}
+			</if>
+		</where>
+		ORDER BY
+		create_time DESC
+		LIMIT #{rowIndex},#{pageSize};
+	</select>
+	<select id="queryPersonInfoCount" resultType="int">
+		SELECT
+		count(1)
+		FROM
+		tb_person_info
+		<where>
+			<if test="personInfoCondition.userType != null">
+				and user_type= #{personInfoCondition.userType}
+			</if>
+			<!-- 写like语句的时候 一般都会写成 like '% %' 在mybatis里面写就是应该是 like '%${name} %' 而不是 
+				'%#{name} %' ${name} 是不带单引号的，而#{name} 是带单引号的 -->
+			<if test="personInfoCondition.name!=null">
+				and name like '%${personInfoCondition.name}%'
+			</if>
+			<if test="personInfoCondition.enableStatus!=null">
+				and enable_status = #{personInfoCondition.enableStatus}
+			</if>
+		</where>
+	</select>
+	<select id="queryPersonInfoById" resultType="org.fox.o2o.entity.PersonInfo"
+		parameterType="Long">
+		<!-- 具体的sql -->
+		SELECT
+		user_id,
+		name,
+		sex,
+		phone,
+		email,
+		profile_img,
+		user_type,
+		create_time,
+		last_edit_time,
+		enable_status
+		FROM
+		tb_person_info
+		WHERE
+		user_id = #{userId}
+	</select>
+	<insert id="insertPersonInfo" parameterType="org.fox.o2o.entity.PersonInfo"
+		useGeneratedKeys="true" keyProperty="userId" keyColumn="user_id">
+		INSERT
+		INTO
+		tb_person_info(name,sex,email,profile_img,user_type,create_time,last_edit_time,enable_status)
+		VALUES
+		(#{name},#{sex},#{email},#{profileImg},#{userType},
+		#{createTime},#{lastEditTime},#{enableStatus})
+	</insert>
+	<update id="updatePersonInfo" parameterType="org.fox.o2o.entity.PersonInfo">
+		update tb_person_info
+		<set>
+			<if test="name != null">name=#{name},</if>
+			<if test="sex != null">sex=#{sex},</if>
+			<if test="email != null">email=#{email},</if>
+			<if test="profileImg != null">user_type=#{profileImg},</if>
+			<if test="userType != null">admin_flag=#{userType},</if>
+			<if test="lastEditTime != null">last_edit_time=#{lastEditTime},</if>
+			<if test="enableStatus != null">enable_status=#{enableStatus}</if>
+		</set>
+		where user_id=#{userId}
+	</update>
+	<delete id="deletePersonInfo">
+		DELETE FROM
+		tb_person_info
+		WHERE
+		user_id =
+		#{userId}
+	</delete>
+</mapper>
